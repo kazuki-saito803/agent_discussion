@@ -2,48 +2,63 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel, PeftConfig
 import torch
 
-# 🔸 LoRAアダプタの保存先（あなたのフォルダパス）
-lora_adapter_path = "./educator/"
 
-# 🔹 LoRA設定ファイルからベースモデル名を取得
-peft_config = PeftConfig.from_pretrained(lora_adapter_path)
-base_model_name = peft_config.base_model_name_or_path  # 例: "meta-llama/Llama-2-7b-hf"
-
-# 🔸 ベースモデル読み込み（FP16 / GPU最適化）
 base_model = AutoModelForCausalLM.from_pretrained(
-    base_model_name,
+    "meta-llama/Llama-3.2-1B-Instruct",
     device_map="auto",           # GPU 自動割当
     torch_dtype=torch.float16
 )
 
-# 🔹 LoRAアダプタをマージ（統合モデルを作成）
-model = PeftModel.from_pretrained(base_model, lora_adapter_path)
-model = model.merge_and_unload()  # LoRAとベースモデルを統合
+class agent():
+    def __init__(self, folder_name):
+        self.role = folder_name
+        self.folder_path = f"./{folder_name}"
+        self.instruction = {
+                "educator":"このテーマについて、生徒の学びやすさや理解の深まりという観点から、どのようにアプローチすべきか考えてください。教師としての経験を踏まえ、現場での実践可能性についても述べてください。",
+                "engineer":"この課題を技術的に解決するにはどのような方法があるか、AIやITの活用可能性を中心に、効率性・実現性・革新性の観点から提案してください。データやロジックに基づく説明をお願いします。",
+                "ethics_committee":"このアイデアや技術の導入に関して、倫理的なリスクや社会的な影響をどう評価しますか？プライバシー、人権、偏見の可能性などを考慮した上で、問題点とその対処策を挙げてください。",
+                "gurdian":"この取り組みが子どもたちにどのような影響を与えるか、保護者の視点から考えてください。安全性、成長への影響、家庭でのサポートのしやすさについても意見を述べてください。",
+                "student":"この話題について、学生の立場からリアルな感覚で意見を述べてください。実際に使うとしたらどう感じるか、何がうれしくて、何が不安か、身近な経験も交えて話してください。"
+            }.get(folder_name)
+        # self.peft_config = PeftConfig.from_pretrained(self.folder_path)
+        # self.base_model_name = "meta-llama/Llama-3.2-1B-Instruct" 
 
-# 🔸 トークナイザーはベースモデルと同じ
-tokenizer = AutoTokenizer.from_pretrained(base_model_name)
+        # 🔸 ベースモデル読み込み（FP16 / GPU最適化）
+        # self.base_model = AutoModelForCausalLM.from_pretrained(
+        #     "meta-llama/Llama-3.2-1B-Instruct",
+        #     device_map="auto",           # GPU 自動割当
+        #     torch_dtype=torch.float16
+        # )
 
-# 🔹 推論（例）
-instruction = "プロジェクトに関する質問に答えてください"
-input_text = "このプロジェクトでコンポーネントを格納するディレクトリ構成は？"
-prompt = f"### Instruction:\n{instruction}\n\n### Input:\n{input_text}\n\n### Response:\n"
-inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
+        # 🔹 LoRAアダプタをマージ（統合モデルを作成）
+        self.model = PeftModel.from_pretrained(base_model, self.folder_path)
+        self.model = self.model.to(torch.float16).to("cuda" if torch.cuda.is_available() else "cpu")  # 明示的にロード
+        # self.model = self.model.merge_and_unload()
 
-with torch.no_grad():
-    outputs = model.generate(
-        **inputs,
-        max_new_tokens=200,
-        temperature=0.7,
-        top_p=0.9,
-        do_sample=True,
-        pad_token_id=tokenizer.eos_token_id
-    )
+        # 🔸 トークナイザーはベースモデルと同じ
+        self.tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
+    
+        
+    def predict(self, prompt):
+        # 🔹 推論（例）
+        prompt = f"### Instruction:\n{self.instruction}\n\n### Input:\n{prompt}\n\n### Response:\n"
+        inputs = self.tokenizer(prompt, return_tensors="pt").to(self.model.device)
 
-# 🔸 出力表示
-full_response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-if "### Response:" in full_response:
-    response = full_response.split("### Response:")[-1].strip()
-else:
-    response = full_response.strip()
+        with torch.no_grad():
+            outputs = self.model.generate(
+                **inputs,
+                max_new_tokens=200,
+                temperature=0.5,
+                top_p=0.9,
+                do_sample=True,
+                pad_token_id=self.tokenizer.eos_token_id
+            )
 
-print(response)
+        # 🔸 出力表示
+        full_response = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
+        if "### Response:" in full_response:
+            response = full_response.split("### Response:")[-1].strip()
+        else:
+            response = full_response.strip()
+
+        return response
