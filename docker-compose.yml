@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+  api_service_1:
+    build: ./api_service_1
+    container_name: api_service_1
+    ports:
+      - "8001:8000"
+
+  api_service_2:
+    build: ./api_service_2
+    container_name: api_service_2
+    ports:
+      - "8002:8000"
+
+  entrypoint:
+    build: ./entrypoint
+    container_name: entrypoint
+    ports:
+      - "8000:8000"
+    depends_on:
+      - api_service_1
+      - api_service_2

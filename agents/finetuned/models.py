@@ -20,15 +20,6 @@ class agent():
                 "gurdian":"この取り組みが子どもたちにどのような影響を与えるか、保護者の視点から考えてください。安全性、成長への影響、家庭でのサポートのしやすさについても意見を述べてください。",
                 "student":"この話題について、学生の立場からリアルな感覚で意見を述べてください。実際に使うとしたらどう感じるか、何がうれしくて、何が不安か、身近な経験も交えて話してください。"
             }.get(folder_name)
-        # self.peft_config = PeftConfig.from_pretrained(self.folder_path)
-        # self.base_model_name = "meta-llama/Llama-3.2-1B-Instruct" 
-
-        # 🔸 ベースモデル読み込み（FP16 / GPU最適化）
-        # self.base_model = AutoModelForCausalLM.from_pretrained(
-        #     "meta-llama/Llama-3.2-1B-Instruct",
-        #     device_map="auto",           # GPU 自動割当
-        #     torch_dtype=torch.float16
-        # )
 
         # 🔹 LoRAアダプタをマージ（統合モデルを作成）
         self.model = PeftModel.from_pretrained(base_model, self.folder_path)
