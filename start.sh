@@ -1,5 +1,5 @@
 # 引数チェック
-if [ "$#" -ne 3 ]; then
+if [ "$#" -ne 2 ]; then
   echo "Usage: ./start.sh <theme> <turn> <dir>"
   exit 1
 fi
@@ -7,7 +7,7 @@ fi
 # 引数を変数に代入
 THEME="$1"
 TURN="$2"
-DIR="$3"
+DIR="../outputs"
 
 # 日時取得（例：2025-07-24-04-24）
 TODAY=$(date +"%Y-%m-%d_%H-%M")
@@ -28,4 +28,4 @@ curl -X POST "http://127.0.0.1:8001/discussion/" \
   -H "Content-Type: application/json" \
   -d "{\"theme\": \"$THEME\", \"turn\": $TURN}" > "${PT_OUTPUT_PATH}"
 
-echo "✅ 出力完了: ${DIR}"
+echo "✅ 出力完了: outputs"
