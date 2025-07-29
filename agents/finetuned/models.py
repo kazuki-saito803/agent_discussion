@@ -1,12 +1,17 @@
+import os
+
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import PeftModel, PeftConfig
 import torch
 
 
+token = os.getenv("HUGGINGFACE_TOKEN")
+
 base_model = AutoModelForCausalLM.from_pretrained(
     "meta-llama/Llama-3.2-1B-Instruct",
     device_map="auto",           # GPU 自動割当
-    torch_dtype=torch.float16
+    torch_dtype=torch.float16,
+    use_auth_token=token
 )
 
 class agent():
@@ -24,10 +29,9 @@ class agent():
         # 🔹 LoRAアダプタをマージ（統合モデルを作成）
         self.model = PeftModel.from_pretrained(base_model, self.folder_path)
         self.model = self.model.to(torch.float16).to("cuda" if torch.cuda.is_available() else "cpu")  # 明示的にロード
-        # self.model = self.model.merge_and_unload()
 
         # 🔸 トークナイザーはベースモデルと同じ
-        self.tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct")
+        self.tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct", use_auth_token=token)
     
         
     def predict(self, prompt):

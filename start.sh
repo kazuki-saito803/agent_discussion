@@ -1,13 +1,13 @@
 # 引数チェック
 if [ "$#" -ne 2 ]; then
-  echo "Usage: ./start.sh <theme> <turn> <dir>"
+  echo "Usage: ./start.sh <theme> <turn>"
   exit 1
 fi
 
 # 引数を変数に代入
 THEME="$1"
 TURN="$2"
-DIR="../outputs"
+DIR="./outputs"
 
 # 日時取得（例：2025-07-24-04-24）
 TODAY=$(date +"%Y-%m-%d_%H-%M")

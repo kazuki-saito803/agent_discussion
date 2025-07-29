@@ -1,14 +1,19 @@
+import os
+
 from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM
 
+
+token = os.getenv("HUGGINGFACE_TOKEN")
 
 model_name = "meta-llama/Llama-3.2-1B-Instruct"
 
 # トークナイザーとモデルを読み込む
-tokenizer = AutoTokenizer.from_pretrained(model_name)
+tokenizer = AutoTokenizer.from_pretrained(model_name, use_auth_token=token)
 model = AutoModelForCausalLM.from_pretrained(
     model_name,
-    device_map={"": "cpu"},           # GPU使用（なければCPU）
-    torch_dtype="auto"           # 自動で float16 などに切り替え（効率化）
+    device_map={"": "cpu"},
+    torch_dtype="auto",
+    use_auth_token=token
 )
 
 # pipelineを構築
@@ -26,6 +31,15 @@ def predict(theme, template, is_first, last_comment=""):
     if is_first:
         prompt = f"{template}\n\n{theme}についてあなたの意見を聞かせてください。"
     else:
-        prompt = f"ある方は「{last_comment}」と言っています。{theme}についてあなたの意見を聞かせてください。"
+        prompt = f"ある方は「{last_comment}」と言っています。\n{template}\n\n{theme}についてあなたの意見を聞かせてください。"
+    
     output = llama_pipeline(prompt)
-    return output[0]["generated_text"]
+    generated = output[0]["generated_text"]
+
+    # プロンプト部分を除外（生成文からプロンプトを引いた残りを返す）
+    if generated.startswith(prompt):
+        result = generated[len(prompt):].strip()
+    else:
+        result = generated.strip()
+
+    return result

@@ -43,7 +43,7 @@ def discussion(item: Item):
             response = instance.predict(prompt)
             conversation_history[turn].append(f"{instance.role}: {response}")
 
-    return {"conversation_history": conversation_history}
+    return conversation_history
 
 
 if __name__ == "__main__":

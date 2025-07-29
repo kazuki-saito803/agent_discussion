@@ -25,10 +25,12 @@ def discussion(item: Item):
     for turn in range(item.turn):
         for j, agent in enumerate(agents):
             if j == 0:
-                conversation_history[turn].append(models.predict(item.theme, template[agent], True))
+                tmp = models.predict(item.theme, template[agent], True)
+                conversation_history[turn].append(f"{agents[j]}: {tmp}")
             else:
                 last_comment = conversation_history[turn][-1]
-                conversation_history[turn].append(models.predict(item.theme, template[agent], False, last_comment))
+                tmp = models.predict(item.theme, template[agent], False, last_comment=last_comment)
+                conversation_history[turn].append(f"{agents[j]}: {tmp}")
     return conversation_history
 
 if __name__ == "__main__":
