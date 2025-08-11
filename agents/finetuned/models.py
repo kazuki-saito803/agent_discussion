@@ -1,14 +1,18 @@
 import os
-
+from dotenv import load_dotenv
 from transformers import AutoModelForCausalLM, AutoTokenizer
-from peft import PeftModel, PeftConfig
+from peft import PeftModel
 import torch
 
 
+load_dotenv(dotenv_path="../../.env")
+
 token = os.getenv("HUGGINGFACE_TOKEN")
 
+model_name = "meta-llama/Llama-3.2-1B-Instruct"
+
 base_model = AutoModelForCausalLM.from_pretrained(
-    "meta-llama/Llama-3.2-1B-Instruct",
+    model_name,
     device_map="auto",           # GPU 自動割当
     torch_dtype=torch.float16,
     use_auth_token=token
@@ -35,7 +39,6 @@ class agent():
     
         
     def predict(self, prompt):
-        # 🔹 推論（例）
         prompt = f"### Instruction:\n{self.instruction}\n\n### Input:\n{prompt}\n\n### Response:\n"
         inputs = self.tokenizer(prompt, return_tensors="pt").to(self.model.device)
 
@@ -43,7 +46,7 @@ class agent():
             outputs = self.model.generate(
                 **inputs,
                 max_new_tokens=200,
-                temperature=0.5,
+                temperature=0.7,
                 top_p=0.9,
                 do_sample=True,
                 pad_token_id=self.tokenizer.eos_token_id
