@@ -19,32 +19,6 @@
 | Docker                    | APIの実行基盤となるコンテナを提供 |
 | Hugging Face              | LoRAを用いたFTモデルなどを取得するために使用 |
 
-## プロジェクト構成
-```
-agent_discussion/
-├── README.md
-├── requirements.txt
-├── .gitignore
-├── docker-compose.yml
-├── start.sh
-├── start.ps1
-├── agents/
-│   ├── finetuned/
-│   │   ├── <agent>/
-│   │   ├── Dockerfile
-│   │   ├── main.py
-│   │   └── models.py
-│   └── prompt/
-│   │   ├── Dockerfile
-│   │   ├── main.py
-│   │   ├── templates.py
-│   │   └── models.py
-├── learning_material
-│   └── training.ipynb/
-├── datasets/
-│   ├── <agent>.json
-└── outputs/
-```
 ## 使い方
 1. Gitのインストール
 1. プロジェクトのpull
