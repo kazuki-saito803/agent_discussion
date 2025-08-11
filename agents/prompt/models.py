@@ -1,8 +1,9 @@
 import os
+from dotenv import load_dotenv
 
 from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM
 
-
+load_dotenv(dotenv_path="../../.env")
 token = os.getenv("HUGGINGFACE_TOKEN")
 
 model_name = "meta-llama/Llama-3.2-1B-Instruct"
